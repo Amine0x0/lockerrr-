@@ -6,35 +6,7 @@ LOCKER_WRAPPER="$HOME/.local/bin/locker-gui"
 DESKTOP_DIR="$HOME/.local/share/applications"
 SYSTEM_DESKTOP_DIRS=("/usr/share/applications" "/usr/local/share/applications" "/var/lib/snapd/desktop/applications" "/var/lib/flatpak/exports/share/applications")
 
-EXCLUDE_APPS=(
-    "nm-connection-editor"
-    "gnome-control-center"
-    "kde-system-settings"
-    "xfce4-settings-manager"
-    "pavucontrol"
-    "gnome-terminal"
-    "org.gnome.Terminal"
-    "konsole"
-    "xterm"
-    "debian-xterm"
-    "debian-uxterm"
-    "uxterm"
-    "xfce4-terminal"
-    "alacritty"
-    "kitty"
-    "tilix"
-    "terminator"
-    "x-terminal-emulator"
-    "mate-terminal"
-    "lxterminal"
-    "qterminal"
-    "deepin-terminal"
-    "guake"
-    "tilda"
-    "yakuake"
-)
-
-echo "Setting up GUI application interception..."
+echo "Setting up GUI application interception (ALL apps)..."
 
 mkdir -p "$DESKTOP_DIR"
 SCRIPT_DIR="$(dirname "$0")"
@@ -46,35 +18,9 @@ else
     exit 1
 fi
 
-is_excluded() {
-    local app_name="$1"
-    for excluded in "${EXCLUDE_APPS[@]}"; do
-        if [[ "$app_name" == "$excluded"* ]]; then
-            return 0
-        fi
-    done
-    return 1
-}
-
 wrap_desktop_file() {
     local desktop_file="$1"
     local app_name=$(basename "$desktop_file" .desktop)
-    
-    if is_excluded "$app_name"; then
-        return 1
-    fi
-    
-    if ! grep -q "^Type=Application" "$desktop_file" 2>/dev/null; then
-        return 1
-    fi
-    
-    if grep -q "^NoDisplay=true" "$desktop_file" 2>/dev/null; then
-        return 1
-    fi
-    
-    if grep -q "^Terminal=true" "$desktop_file" 2>/dev/null; then
-        return 1
-    fi
     
     local wrapped_file="$DESKTOP_DIR/${app_name}.desktop"
     local backup_file="$wrapped_file.locker-backup"

@@ -218,6 +218,16 @@ void Lock::logerr()
 void Lock::grant()
 {
     authenticated = true;
+    
+    std::string home = get_home_dir();
+    std::string session_file = home + "/.locker/.session";
+    
+    std::ofstream file(session_file);
+    if (file.is_open())
+    {
+        file << time(NULL);
+        file.close();
+    }
 }
 
 bool Lock::is_authenticated() const

@@ -1,9 +1,21 @@
 #!/bin/bash
 
 LOCKER_BIN="$HOME/.local/bin/locker"
+SESSION_FILE="$HOME/.locker/.session"
+SESSION_TIMEOUT=1800
 
 if [ ! -f "$LOCKER_BIN" ]; then
     exec "$@"
+fi
+
+if [ -f "$SESSION_FILE" ]; then
+    LAST_AUTH=$(cat "$SESSION_FILE" 2>/dev/null || echo "0")
+    CURRENT_TIME=$(date +%s)
+    TIME_DIFF=$((CURRENT_TIME - LAST_AUTH))
+    
+    if [ $TIME_DIFF -lt $SESSION_TIMEOUT ]; then
+        exec "$@"
+    fi
 fi
 
 AUTH_SCRIPT="/tmp/locker_auth_$$"
